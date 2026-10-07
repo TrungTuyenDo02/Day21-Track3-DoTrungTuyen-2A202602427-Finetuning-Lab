@@ -17,6 +17,8 @@
 | `MASK_MODE` | `assistant-only` (mask dựng bằng labkit theo offset ký tự) |
 | Epochs / max_steps | Chưa huấn luyện nên chưa có số liệu; dùng mặc định của tier T4 nếu chạy lại |
 
+**Lý do chọn.** Tôi giữ bộ mặc định của lab (`unsloth/Qwen3.5-4B`, tier T4, 250 ticket CSKH tiếng Việt → JSON triage) vì ba lý do: (1) 4B với LoRA r=16 vừa với T4 16GB; (2) bài toán JSON bốn khóa có nhãn rõ nên chấm tự động được (target, format) mà không cần người chấm; (3) dùng đúng bộ eval của lab (50 mẫu target + 15 mẫu regression) giúp kết quả đối chiếu được với `results/` và với baseline đã đóng băng. Tôi không dùng dataset riêng nên không có `data/CUSTOM_DATASET.md`.
+
 **Template có giữ khối `<think>` không?** Có — kết luận của `template_check`: "reasoning preserved — safe to train on traces" *(results/template_check.json)*. Template Qwen3.5 sinh sẵn khối `<think></think>` rỗng trong generation prompt, nên mask phải dựng đúng ranh giới này; điều này đã được kiểm chứng ở mục 2.
 
 ---
