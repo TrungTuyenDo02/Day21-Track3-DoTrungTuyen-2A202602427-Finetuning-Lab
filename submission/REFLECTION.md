@@ -8,7 +8,7 @@ Baseline (b) mạnh hơn tôi nghĩ. Chỉ bằng cách đổi prompt (đưa sch
 
 **2. Bạn mất nhiều thời gian nhất ở đâu? Nó có phải chỗ bạn dự đoán không?**
 
-Không phải. Tôi dự đoán thời gian sẽ nằm ở việc huấn luyện và đánh giá, nhưng thực tế phần lớn thời gian mất vào hạ tầng: Colab hết quota GPU nên tôi không chạy được NB3/NB4/NB5 trên GPU, rồi thử NB3 trên CPU thì lỗi ở `SFTTrainer` (`'functools.partial' object has no attribute '__func__'`). Tôi cũng mất thời gian vì lỡ chạy NB1/NB3 trên một máy ảo mới mà chưa chép kết quả NB2 sang, nên phải khôi phục `baselines_frozen.json` từ bản sao lưu trên Drive (và không chạy lại NB2 để giữ mốc đã đóng băng).
+Không phải. Tôi dự đoán thời gian sẽ nằm ở việc huấn luyện và đánh giá, nhưng thực tế phần lớn thời gian mất vào hạ tầng: Colab hết quota GPU nên tôi không chạy được NB3/NB4/NB5 trên GPU, rồi thử NB3 và NB4 trên CPU thì cả hai đều lỗi ở `SFTTrainer` (`'functools.partial' object has no attribute '__func__'`). Tôi cũng mất thời gian vì lỡ chạy NB1/NB3 trên một máy ảo mới mà chưa chép kết quả NB2 sang, nên phải khôi phục `baselines_frozen.json` từ bản sao lưu trên Drive (và không chạy lại NB2 để giữ mốc đã đóng băng).
 
 **3. Trước lab này bạn tin điều gì về fine-tuning mà giờ bạn không còn tin?**
 

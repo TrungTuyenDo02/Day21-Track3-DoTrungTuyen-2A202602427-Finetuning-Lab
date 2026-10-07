@@ -3,7 +3,7 @@
 **Họ tên**: Đỗ Trung Tuyến  **MSSV**: 2A202602427  **Ngày**: 07/10/2026
 **Tier**: `T4`  **Base model**: `unsloth/Qwen3.5-4B`  **GPU thực tế**: Colab free T4 16GB (dùng cho NB2; sau đó hết quota GPU)
 
-> **Tuyên bố trung thực về phạm vi.** Bài nộp này là **bài nộp một phần**. NB1 (dữ liệu + mask) và NB2 (đóng băng eval + baseline a/b) đã chạy đầy đủ, hợp lệ (`eval_limit = null`, `smoke_mode = false`). NB3 (huấn luyện `correct`), NB4 (ba run đối chứng) và NB5 (phán quyết, autopsy, định tính) **chưa chạy được** vì Colab hết quota GPU. Các mục phụ thuộc vào chúng (4, 5, 6) được ghi rõ là "chưa đo" và **không có con số nào được bịa ra**. Vì vậy `scripts/verify.py` sẽ báo FAIL ở các artifact thiếu (`runs.csv`, `verdict.json`, `autopsy.json`, adapter `correct`) — đây là hệ quả đã biết, không phải bị bỏ sót.
+> **Tuyên bố trung thực về phạm vi.** Bài nộp này là **bài nộp một phần**. NB1 (dữ liệu + mask) và NB2 (đóng băng eval + baseline a/b) đã chạy đầy đủ, hợp lệ (`eval_limit = null`, `smoke_mode = false`). NB3 (huấn luyện `correct`), NB4 (ba run đối chứng) và NB5 (phán quyết, autopsy, định tính) **chưa chạy được** vì Colab hết quota GPU. Các mục phụ thuộc vào chúng (4, 5, 6) được ghi rõ là "chưa đo" và **không có con số nào được bịa ra**. Vì vậy `scripts/verify.py` báo FAIL ở các artifact thiếu (`runs.csv`, `verdict.json`, `autopsy.json`, adapter `correct`) — đây là hệ quả đã biết, không phải bị bỏ sót. Các kiểm tra còn lại đều đạt: 119 unit test, mask proof, đủ 50 mẫu target, prompt (b) không bị sửa, (b) hơn (a) (0.000 → 0.765) và bộ eval không đổi.
 
 ---
 
@@ -56,7 +56,7 @@ Tập đánh giá: 50 mẫu target, 15 mẫu regression, đã đóng băng (SHA 
 | `wrong_lr` | text-linear | 16 | chưa đo | chưa đo | chưa đo | chưa đo | chưa đo | chưa đo |
 | `qlora` | text-linear | 16 | chưa đo | chưa đo | chưa đo | chưa đo | chưa đo | chưa đo |
 
-Toàn bộ mục này **chưa có dữ liệu** do không chạy được NB3/NB4/NB5. Tôi không đưa ra nhận định về kết quả thực nghiệm; phần dưới chỉ nêu giả thuyết và điều tôi sẽ kiểm chứng.
+Toàn bộ mục này **chưa có dữ liệu chất lượng** do không chạy được NB3/NB4/NB5. NB4 đã được thử chạy nhưng dừng ngay ở run đầu tiên (`attn_only`) với lỗi `'functools.partial' object has no attribute '__func__'` trong `SFTTrainer` (runtime không có GPU, chạy ở chế độ CPU fp32), nên không có `runs.csv`. Trước khi lỗi, NB4 đã tính được cấu hình ghép tham số: `text-linear` r=16 có 32,464,896 tham số huấn luyện, còn `attn_only` (q,v) với rank ghép r=283 có 32,456,704 — chênh dưới 0.03%, nên so sánh vị trí adapter sẽ công bằng. Đó chỉ là phép tính cấu hình, không phải kết quả huấn luyện. Tôi không đưa ra nhận định về kết quả thực nghiệm; phần dưới chỉ nêu giả thuyết và điều tôi sẽ kiểm chứng.
 
 **4.1 — `attn_only` so với `correct`.** Chưa đo. Giả thuyết của tôi: khi số tham số huấn luyện được khớp, vị trí gắn adapter (chỉ q,v so với toàn bộ linear của text) có thể quan trọng hơn rank. Tôi sẽ xếp hạng theo cột target của NB5 chứ không theo train loss, vì dùng loss huấn luyện thay cho chỉ số của tác vụ chính là "Lỗi #3" mà lab cảnh báo.
 
@@ -69,7 +69,7 @@ Toàn bộ mục này **chưa có dữ liệu** do không chạy được NB3/NB
 ## 5. Phán quyết (NB5)
 
 **Kết quả cổng hồi quy**: **chưa xác định** — NB5 chưa chạy, không có `verdict.json`.
-`target Δ`, `regression Δ`, `valid_trace_rate`: chưa đo.
+`target Δ`, `regression Δ`, `valid_trace_rate`: chưa đo. NB5 đã được thử chạy nhưng dừng ở bước nạp adapter vì `adapters/correct/adapter_config.json` không tồn tại (NB3 chưa tạo được adapter). Log của NB5 vẫn xác nhận mốc `baseline (b) target = 0.765`, khớp với mục 3.
 
 Diễn giải: Không có adapter `correct` nên không thể so (c) với (b) và không thể kết luận fine-tune có hơn prompt tốt hay không. Điều duy nhất NB2 cho phép nói chắc chắn là ngưỡng cần vượt: một bản fine-tune chỉ đáng triển khai nếu target vượt 0.765 mà regression không tụt dưới ~0.791 một cách đáng kể và format giữ được 1.000. Rủi ro đáng chú ý là quên kiến thức chung (catastrophic forgetting): tài liệu của lab ghi nhận một lần chạy model nhỏ hơn (0.8B) có target 0.99 so với (b) 0.495, nhưng regression rơi từ 0.644 xuống 0.067. Với model 4B trên T4 điều này chưa được đo, nên tôi coi cổng hồi quy là phần quan trọng nhất cần kiểm chứng khi có GPU và không dự đoán PASSED hay FAILED.
 
